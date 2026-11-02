@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cursor Dance Party</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #111;
+    cursor: none;
+    font-family: Arial, sans-serif;
+  }
+  #party {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  .dancer {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: transform 0.1s;
+  }
+  #message {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="message">Move your mouse to start the dance party! 🎉</div>
+<div id="party"></div>
+<script>
+const party = document.getElementById('party');
+const message = document.getElementById('message');
+const dancers = [];
+const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6ab04c', '#be2edd', '#22a6b3', '#f368e0'];
+const emojis = ['🕺', '💃', '🎉', '✨', '🌟', '🎵', '🎶'];
+
+
+// Create dancers
+for (let i = 0; i < 40; i++) {
+  const dancer = document.createElement('div');
+  dancer.className = 'dancer';
+  dancer.style.background = colors[i % colors.length];
+  dancer.style.width = (10 + Math.random() * 20) + 'px';
+  dancer.style.height = dancer.style.width;
+  dancer.textContent = emojis[i % emojis.length];
+  dancer.style.fontSize = dancer.style.width;
+  dancer.style.display = 'flex';
+  dancer.style.alignItems = 'center';
+  dancer.style.justifyContent = 'center';
+  dancer.style.background = 'transparent';
+  party.appendChild(dancer);
+  
+  dancers.push({
+    el: dancer,
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 4,
+    vy: (Math.random() - 0.5) * 4,
+    angle: Math.random() * Math.PI * 2,
+    speed: 0.5 + Math.random() * 2,
+    radius: 30 + Math.random() * 100
+  });
+}
+
+
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  message.style.opacity = '0';
+});
+
+
+function animate() {
+  dancers.forEach(d => {
+    // Orbit around mouse with some randomness
+    d.angle += d.speed * 0.05;
+    const targetX = mouseX + Math.cos(d.angle) * d.radius;
+    const targetY = mouseY + Math.sin(d.angle) * d.radius;
+    
+    // Smooth follow + bounce
+    d.x += (targetX - d.x) * 0.05;
+    d.y += (targetY - d.y) * 0.05;
+    
+    // Add some independent bounce
+    d.vx += (Math.random() - 0.5) * 0.2;
+    d.vy += (Math.random() - 0.5) * 0.2;
+    d.x += d.vx;
+    d.y += d.vy;
+    d.vx *= 0.98;
+    d.vy *= 0.98;
+    
+    // Keep on screen-ish
+    if (d.x < 0 || d.x > window.innerWidth) d.vx *= -1;
+    if (d.y < 0 || d.y > window.innerHeight) d.vy *= -1;
+    
+    d.el.style.left = d.x + 'px';
+    d.el.style.top = d.y + 'px';
+    d.el.style.transform = `rotate(${d.angle * 30}deg) scale(${1 + Math.sin(d.angle) * 0.3})`;
+  });
+  requestAnimationFrame(animate);
+}
+
+
+animate();
+</script>
+</body>
+</html>
